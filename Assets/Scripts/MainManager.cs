@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using TMPro;
 
 public class MainManager : MonoBehaviour
 {
@@ -11,6 +12,7 @@ public class MainManager : MonoBehaviour
     public Rigidbody Ball;
 
     public Text ScoreText;
+    public Text ScoreText1;
     public GameObject GameOverText;
     
     private bool m_Started = false;
@@ -18,6 +20,7 @@ public class MainManager : MonoBehaviour
     
     private bool m_GameOver = false;
 
+    
     
     // Start is called before the first frame update
     void Start()
@@ -36,6 +39,8 @@ public class MainManager : MonoBehaviour
                 brick.onDestroyed.AddListener(AddPoint);
             }
         }
+
+        
     }
 
     private void Update()
@@ -60,17 +65,44 @@ public class MainManager : MonoBehaviour
                 SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
             }
         }
+
+        ShowHighData();
+        CheckScore();
     }
 
     void AddPoint(int point)
     {
         m_Points += point;
-        ScoreText.text = $"Score : {m_Points}";
+        ScoreText.text = $"Name: {MenuUiHandler.userName} Score: {m_Points}";
+    }
+
+    void ShowHighData()
+    {
+        MenuManager.Instance.LoadData();
+        ScoreText1.text = $"Best Score: {MenuManager.Instance.highScore_point} Name: {MenuManager.Instance.highScore_name}";
+    }
+    private void CheckScore()
+    {
+        MenuManager.Instance.LoadData();
+        //previous high score = phs - the score currently saved in json
+        int phs = MenuManager.Instance.highScore_point;
+        //compare phs and m_points, sets m_points as new highscore if its greater
+        if(m_Points > phs)
+        {
+            MenuManager.Instance.highScore_point = m_Points;
+            MenuManager.Instance.highScore_name = MenuUiHandler.userName;
+        }
     }
 
     public void GameOver()
     {
+        MenuManager.Instance.SaveData();
         m_GameOver = true;
         GameOverText.SetActive(true);
+    }
+
+    public void BackToMenu()
+    {
+        SceneManager.LoadScene(0);
     }
 }
